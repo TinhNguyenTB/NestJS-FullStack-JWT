@@ -10,12 +10,10 @@ export class CreateUserDto {
     @IsNotEmpty()
     password: string;
 
-    @IsPhoneNumber()
+
     phone: string;
 
-    @IsNotEmpty()
     address: string;
 
-    @IsNotEmpty()
     image: string;
 }
