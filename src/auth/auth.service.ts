@@ -30,6 +30,6 @@ export class AuthService {
   }
 
   handleRegister = async (registerDto: RegisterDto) => {
-
+    return await this.usersService.handleRegister(registerDto)
   }
 }
