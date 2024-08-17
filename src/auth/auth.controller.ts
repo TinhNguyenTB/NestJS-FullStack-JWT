@@ -1,13 +1,16 @@
 import { Controller, Request, Post, UseGuards, Get, Body } from '@nestjs/common';
 import { LocalAuthGuard } from './passport/local-auth.guard';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './passport/jwt-auth.guard';
 import { Public } from '@/decorator/customize';
 import { RegisterDto } from './dto/registerDto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private readonly mailerService: MailerService
+  ) { }
 
   @UseGuards(LocalAuthGuard)
   @Public()
@@ -22,4 +25,19 @@ export class AuthController {
     return this.authService.handleRegister(registerDto);
   }
 
+  @Public()
+  @Get('mail')
+  testMail() {
+    this.mailerService
+      .sendMail({
+        to: 'lehieu18102k3@gmail.com',
+        subject: 'Testing Nest Mailermodule with template ✔',
+        text: 'Welcome',
+        html: '<p>Hello world</p>'
+      })
+      .then(() => { })
+      .catch(() => { });
+
+    return 'ok';
+  }
 }
