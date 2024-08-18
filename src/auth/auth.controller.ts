@@ -25,19 +25,4 @@ export class AuthController {
     return this.authService.handleRegister(registerDto);
   }
 
-  @Public()
-  @Get('mail')
-  testMail() {
-    this.mailerService
-      .sendMail({
-        to: 'lehieu18102k3@gmail.com',
-        subject: 'Testing Nest Mailermodule with template ✔',
-        text: 'Welcome',
-        html: '<p>Hello world</p>'
-      })
-      .then(() => { })
-      .catch(() => { });
-
-    return 'ok';
-  }
 }
