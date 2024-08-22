@@ -32,4 +32,10 @@ export class AuthController {
     return this.authService.checkCode(codeAuthDto);
   }
 
+  @Public()
+  @Post('retry-active')
+  retryActive(@Body("email") email: string) {
+    return this.authService.retryActive(email);
+  }
+
 }

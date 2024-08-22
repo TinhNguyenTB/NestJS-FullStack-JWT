@@ -155,4 +155,31 @@ export class UsersService {
       isActive: isBeforeCheck
     }
   }
+
+  async retryActive(email: string) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException("Account is not exist")
+    }
+    if (user.isActive) {
+      throw new BadRequestException("Account has been activated")
+    }
+    //send email
+    const codeId = uuidv4();
+    await user.updateOne({
+      codeId: codeId,
+      codeExpired: dayjs().add(5, 'minutes')
+    })
+
+    this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Activate your account ✔',
+      template: 'register',
+      context: {
+        name: user.name ?? user.email,
+        activationCode: codeId
+      }
+    })
+    return { _id: user._id }
+  }
 }
