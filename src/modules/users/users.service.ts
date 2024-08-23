@@ -6,7 +6,7 @@ import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { generateHashPassword } from '@/helpers/utils';
 import aqp from 'api-query-params';
-import { CodeAuthDto, RegisterDto } from '@/auth/dto/registerDto';
+import { ChangePasswordAuthDto, CodeAuthDto, RegisterDto } from '@/auth/dto/registerDto';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -181,5 +181,57 @@ export class UsersService {
       }
     })
     return { _id: user._id }
+  }
+
+  async retryPassword(email: string) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException("Account is not exist")
+    }
+
+    //send email
+    const codeId = uuidv4();
+    await user.updateOne({
+      codeId: codeId,
+      codeExpired: dayjs().add(5, 'minutes')
+    })
+
+    this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Change your password account ✔',
+      template: 'register',
+      context: {
+        name: user.name ?? user.email,
+        activationCode: codeId
+      }
+    })
+    return {
+      _id: user._id,
+      email: user.email
+    }
+  }
+
+  async changePassword(data: ChangePasswordAuthDto) {
+    const user = await this.userModel.findOne({ email: data.email });
+    if (!user) {
+      throw new BadRequestException("Account is not exist")
+    }
+    if (data.password !== data.confirmPassword) {
+      throw new BadRequestException("Passwords do not match")
+    }
+    // check expire code
+    const isBeforeCheck = dayjs().isBefore(user.codeExpired);
+    if (isBeforeCheck) {
+      const newPassword = await generateHashPassword(data.password);
+      await user.updateOne(
+        { password: newPassword }
+      )
+    }
+    else {
+      throw new BadRequestException("Your activation code is invalid or has expired")
+    }
+    return {
+      success: isBeforeCheck
+    }
   }
 }

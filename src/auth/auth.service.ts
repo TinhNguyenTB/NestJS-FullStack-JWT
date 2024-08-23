@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '@/modules/users/users.service';
 import { comparePassword } from '@/helpers/utils';
 import { JwtService } from '@nestjs/jwt';
-import { CodeAuthDto, RegisterDto } from './dto/registerDto';
+import { ChangePasswordAuthDto, CodeAuthDto, RegisterDto } from './dto/registerDto';
 
 @Injectable()
 export class AuthService {
@@ -47,5 +47,13 @@ export class AuthService {
 
   async retryActive(email: string) {
     return await this.usersService.retryActive(email)
+  }
+
+  async retryPassword(email: string) {
+    return await this.usersService.retryPassword(email)
+  }
+
+  async changePassword(data: ChangePasswordAuthDto) {
+    return await this.usersService.changePassword(data)
   }
 }
